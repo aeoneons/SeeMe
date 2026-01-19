@@ -20,9 +20,9 @@ def compareGesture(hand, gesture):
     #O(n^2)
     allowedDeviation = .048
     for landmark in range(21):
-        handx = hand[landmark].x
-        handy = hand[landmark].y
-        handz = hand[landmark].z
+        handx = hand[landmark][0]
+        handy = hand[landmark][1]
+        handz = hand[landmark][2]
         gesturex = gesture[landmark][0]
         gesturey = gesture[landmark][1]
         gesturez = gesture[landmark][2]
@@ -33,9 +33,9 @@ def compareGesture(hand, gesture):
         for otherlandmark in range(landmark+1, 21):
             
             
-            otherLandmarkDist = math.sqrt((hand[otherlandmark].x - gesture[otherlandmark][0])**2 
-                                          + (hand[otherlandmark].y - gesture[otherlandmark][1])**2 
-                                          + (hand[otherlandmark].z - gesture[otherlandmark][2])**2)
+            otherLandmarkDist = math.sqrt((hand[otherlandmark][0] - gesture[otherlandmark][0])**2 
+                                          + (hand[otherlandmark][1] - gesture[otherlandmark][1])**2 
+                                          + (hand[otherlandmark][2] - gesture[otherlandmark][2])**2)
             
             
             if not checkDifference(landmarkDist, otherLandmarkDist, allowedDeviation):

@@ -11,26 +11,27 @@ from queue import Queue
 import base64
 import os
 import math
-from handframe import proccesFrame
+from handframe import proccesFrame, compareGesture
 import numpy
 from handphoto import proccesFramePhoto
 from flask import jsonify
 from gesture import *
-
+from flask_cors import CORS
+import webbrowser
 
 
 
 app = Flask(__name__)
-gestureslist = ["THUMBS UP", "POINTER UP", "RING UP", "FIST", "PALMS SPREAD"]
 name = "Jessalyn"
 handMarks = '[]'
 gestures = []
+whereTo = ["https://www.youtube.com/watch?v=xvFZjo5PgG0&list=RDxvFZjo5PgG0&start_radio=1", ['https://wellesley-refresh.vercel.app']]
 
 @app.route("/")
 def hello_world(input = "Jess"):
     global name 
     name = input
-    return render_template("hand.html", person=name, gestures = gestureslist, handMarks = "Upload First")
+    return render_template("hand.html", person=name, gestures = gestures, handMarks = "Upload First", whereTo=whereTo)
 
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -45,12 +46,12 @@ def upload():
     jpegbytes = jpeg.tobytes()
     img = base64.b64encode(jpegbytes).decode('utf-8')
     
-    return render_template("hand.html", person=name, gestures = gestureslist, result_url = img, handmarksphoto=str(landmarks))
+    return render_template("hand.html", person=name, gestures = gestures, result_url = img, handmarksphoto=str(landmarks), whereTo=whereTo)
 
 @app.route('/drop_down', methods=['GET', 'POST'])
 def dropdown():
     
-    return render_template("hand.html", person = name, message = "NEW CLICK", gestures = gestureslist)
+    return render_template("hand.html", person = name, message = "NEW CLICK", gestures = gestures, whereTo=whereTo )
 
 def generateFrame():
     global handMarks
@@ -76,9 +77,15 @@ def getLandMarks():
 @app.route('/checkGesture')
 def checkGesture():
     global gestures
-    if len(gestures) > 0:
-        
+    if len(gestures) == 0:
+        return jsonify({'result': False, 'id': 0}) 
+    for gestureID, gesture in enumerate(gestures):
+        result = compareGesture(handMarks, gesture)
+        if result:
+            return jsonify({'result': result, 'id': gestureID}) 
+    return jsonify({'result': False, 'id': 'N/A'}) 
 
 @app.route('/video_feed')
 def video_feed():
     return Response(generateFrame(), mimetype='multipart/x-mixed-replace; boundary=frame')
+

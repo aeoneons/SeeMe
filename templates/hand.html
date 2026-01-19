@@ -30,7 +30,7 @@
 </form>
 
 {% if result_url %}
-  <p> <img src="data:image/jpeg;base64,{{ result_url }}"></p>
+  <p> <img src="data:image/jpeg;base64,{{ result_url }}"> </p>
 {% endif %}
 
 <img src = "{{url_for('video_feed')}}" width="640" height="480">
@@ -43,10 +43,18 @@
 <pre id="landmarkdetected">N/A</pre>
 
 <script>
+const whereTo = "{{ whereTo }}";
+let trigg = false
+
 async function updateHandMarks() {
   const data = await fetch("/getLandMarks")
   const jsonData = await data.json()
+  const isGesture = await fetch("/checkGesture")
+  const isGestureData = await isGesture.json()
   document.getElementById('landmarksLive').innerText = JSON.stringify(jsonData,null, 0)
+  document.getElementById('landmarkdetected').innerText = JSON.stringify(isGestureData)
+  if (isGestureData['result'] && !trigg) {trigg = true; window.open(whereTo[isGestureData['id']], '_blank'); }
+  trigg = false
 }
 setInterval(updateHandMarks, 500)
 </script>
