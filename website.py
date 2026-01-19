@@ -25,7 +25,7 @@ app = Flask(__name__)
 name = "Jessalyn"
 handMarks = '[]'
 gestures = []
-whereTo = ["https://www.youtube.com/watch?v=xvFZjo5PgG0&list=RDxvFZjo5PgG0&start_radio=1", ['https://wellesley-refresh.vercel.app']]
+whereTo = []
 
 @app.route("/")
 def hello_world(input = "Jess"):
@@ -37,10 +37,17 @@ def hello_world(input = "Jess"):
 def upload():
     global gestures
     file = request.files['file']
+    url = request.form.get('url')
+    print('AHHHHHHHHHHHHH', url)
+
+    if url:
+        whereTo.append(url)
+
     filebytes = file.read()
     npfile = numpy.frombuffer(filebytes, numpy.uint8)
     frame = cv2.imdecode(npfile, cv2.IMREAD_COLOR)
     proccesedFrame, landmarks = proccesFramePhoto(frame)
+
     gestures.append(landmarks)
     ret, jpeg = cv2.imencode(".jpg", proccesedFrame)
     jpegbytes = jpeg.tobytes()
@@ -48,10 +55,6 @@ def upload():
     
     return render_template("hand.html", person=name, gestures = gestures, result_url = img, handmarksphoto=str(landmarks), whereTo=whereTo)
 
-@app.route('/drop_down', methods=['GET', 'POST'])
-def dropdown():
-    
-    return render_template("hand.html", person = name, message = "NEW CLICK", gestures = gestures, whereTo=whereTo )
 
 def generateFrame():
     global handMarks
